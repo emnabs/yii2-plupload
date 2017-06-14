@@ -77,12 +77,13 @@ Plupload::widget([
 ]);
 ```
 
-### Usage actions with PluploadAction
+Usage actions with PluploadAction
 
 ```php
 public function actions()
 {
     return [
+	...
         'plupload' => [
 	    'class' => 'emhome\plupload\PluploadAction',
 	    'onComplete' => function($file, $params) {
@@ -94,6 +95,7 @@ public function actions()
 	        ];
 	    },
 	],
+	...
     ];
 }
 ```
