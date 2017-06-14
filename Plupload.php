@@ -35,11 +35,16 @@ class Plupload extends InputWidget {
     public $options = [];
     public $autoUpload = false;
     public $showUploadProgress = true;
-    public $chunk_size = 1;
+    public $chunk_size = 0;
     public $events = [];
     public $multiSelection = false;
     public $showUploadFiles = [];
     public $customOptions = [];
+    public $resize = [];
+    private $resizeOptions = [
+        'crop' => true,
+        'quality' => 100,
+    ];
     public $allow_max_nums = 0;
 
     /**
@@ -98,6 +103,10 @@ class Plupload extends InputWidget {
         }
         if (!isset($this->browseOptions['class'])) {
             $this->browseOptions['class'] = "plupload-btn-browse";
+        }
+
+        if (!empty($this->resize)) {
+            $this->options['resize'] = ArrayHelper::merge($this->resizeOptions, $this->resize);
         }
 
         if ($this->multiSelection) {
@@ -235,6 +244,7 @@ class Plupload extends InputWidget {
         $options = ArrayHelper::merge($defaultOptions, $this->options);
         $options = Json::encode($options);
 
+
         $scripts = implode("\n", [
             "var {$this->id} = new plupload.Uploader({$options});",
             "{$this->id}.init();",
@@ -281,15 +291,20 @@ class Plupload extends InputWidget {
         if (isset($this->htmlOptions['style'])) {
             return;
         }
-        $width = isset($this->wrapperOptions['width']) ? (int) $this->wrapperOptions['width'] : 360;
-        $height = isset($this->wrapperOptions['height']) ? (int) $this->wrapperOptions['height'] : 180;
-        if ($width) {
-            $width = sprintf("width: %dpx;", $width);
+        $width = 480;
+        $height = 300;
+        if (isset($this->options['resize']) && !empty($resize = $this->options['resize'])) {
+            $width = !isset($resize['width']) ?: $resize['width'];
+            $height = !isset($resize['height']) ?: $resize['height'];
         }
-        if ($height) {
-            $height = sprintf("height: %dpx;", $height);
+
+        if (isset($this->wrapperOptions['width'])) {
+            $width = (int) $this->wrapperOptions['width'];
         }
-        $this->htmlOptions['style'] = $width . $height;
+        if (isset($this->wrapperOptions['height'])) {
+            $height = (int) $this->wrapperOptions['height'];
+        }
+        $this->htmlOptions['style'] = "width: {$width}px; height: {$height}px;";
     }
 
     /**
