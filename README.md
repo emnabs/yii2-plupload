@@ -1,18 +1,11 @@
 # Yii2 Plupload Widget
 
-Smser is a component based sms solution for Yii2.It is released under the BSD 3-Clause license.
+yii2-plupload is a widget based plupload solution for Yii2. It is released under the BSD 3-Clause license.
 
 [![Latest Stable Version](https://poser.pugx.org/emnabs/yii2-plupload/v/stable.png)](https://packagist.org/packages/emnabs/yii2-plupload)
 [![Total Downloads](https://poser.pugx.org/emnabs/yii2-plupload/downloads.png)](https://packagist.org/packages/emnabs/yii2-plupload)
 [![License](https://poser.pugx.org/emnabs/yii2-plupload/license.png)](https://packagist.org/packages/emnabs/yii2-plupload)
 
-
-## Plupload
-
-Copyright 2016, [Ephox](http://www.ephox.com/)  
-Released under [GPLv2 License](https://github.com/moxiecode/plupload/blob/master/license.txt).
-
-We also provide [commercial license](http://www.plupload.com/commercial.php).
 
 ## Installation
 
@@ -36,7 +29,7 @@ to the require section of your composer.json.
 
 To use this widget, you have to add the code in your viewer page:
 
-### Usage With ActiveForm and model
+Usage With ActiveForm and model
 
 ```
 use emhome\plupload\Plupload;
@@ -59,7 +52,7 @@ echo $form->field($model, 'thumb')->widget(Plupload::classname(), [
 ]);
 ```
 
-### Usage Without ActiveForm model
+Usage Without ActiveForm model
 
 ```
 use emhome\plupload\Plupload;
@@ -109,3 +102,9 @@ public function actions()
 ## License
 
 **yii2-plupload** is released under the `BSD 3-Clause` License. See the bundled `LICENSE.md` for details.
+
+
+## Plupload
+
+Copyright 2016, [Ephox](http://www.ephox.com/)  
+Released under [GPLv2 License](https://github.com/moxiecode/plupload/blob/master/license.txt)
