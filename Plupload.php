@@ -235,19 +235,19 @@ class Plupload extends InputWidget {
         $options = ArrayHelper::merge($defaultOptions, $this->options);
         $options = Json::encode($options);
 
-        $scripts = '';
+        $scripts = implode("\n", [
+            "var {$this->id} = new plupload.Uploader({$options});",
+            "{$this->id}.init();",
+            "{$this->buildCallbackEvent()}",
+        ]);
+        $customOptions = '';
         if ($this->multiSelection) {
             $customOptions = Json::encode([
                 'name' => $this->name,
                 'id' => $this->responeElementId,
             ]);
-            $scripts .= "Custom.init({$customOptions});\n";
         }
-        $scripts .= implode("\n", [
-            "var {$this->id} = new plupload.Uploader({$options});",
-            "{$this->id}.init();",
-            "{$this->buildCallbackEvent()}",
-        ]);
+        $scripts .= "\nCustom.init({$customOptions});";
 
         $view->registerJs($scripts);
     }
