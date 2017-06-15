@@ -126,7 +126,7 @@ class PluploadEvents extends \yii\base\Object {
      */
     protected function bindBeforeUpload() {
         return 'function(uploader, file){
-            ' . self::JQUERY . '("#" + file.id).find(".plupload_file_mark").addClass("plupload_file_uploading").html("正在上传");
+            ' . self::JQUERY . '("#" + file.id).find(".plupload_file_mark").addClass("plupload_file_uploading").html("姝ｅ湪涓婁紶");
         }';
     }
 
