@@ -1,26 +1,26 @@
 <?php
 
-/**
- * @link http://www.tintsoft.com/
- * @copyright Copyright (c) 2012 TintSoft Technology Co. Ltd.
- * @license http://www.tintsoft.com/license/
- */
-
 namespace emhome\plupload;
 
 use Yii;
 use yii\web\AssetBundle;
 
 /**
- * Class PluploadAsset
- * @package xutl\plupload
+ * PluploadAsset
+ *
+ * @package plupload\assets
+ * @link http://www.tintsoft.com/
+ * @copyright Copyright (c) 2012 TintSoft Technology Co. Ltd.
+ * @license http://www.tintsoft.com/license/
+ * @author emhome <emhome@163.com>
+ * @since 2.0
  */
 class PluploadAsset extends AssetBundle {
 
     public $publishOptions = [
-        'forceCopy' => true//YII_DEBUG
+        'forceCopy' => YII_DEBUG
     ];
-    public $sourcePath = '@widgets/plupload/assets';
+    public $sourcePath = '@emhome/plupload/assets';
 
     /**
      * @var array 包含的JS
@@ -34,7 +34,7 @@ class PluploadAsset extends AssetBundle {
      * @var array 包含的CSS
      */
     public $css = [
-        'css/plupload.css',
+        'css/plupload.min.css',
     ];
 
     /**
@@ -44,13 +44,16 @@ class PluploadAsset extends AssetBundle {
         'yii\web\JqueryAsset',
         'yii\bootstrap\BootstrapAsset',
     ];
+
+    /**
+     * @var string 使用语言包
+     */
     public $language;
 
     /**
      * @inheritdoc
      */
     public function init() {
-        // 设置加载语言包
         if (!$this->language) {
             $this->language = Yii::$app->language;
         }

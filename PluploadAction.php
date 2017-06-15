@@ -1,11 +1,5 @@
 <?php
 
-/**
- * @link http://www.tintsoft.com/
- * @copyright Copyright (c) 2012 TintSoft Technology Co. Ltd.
- * @license http://www.tintsoft.com/license/
- */
-
 namespace emhome\plupload;
 
 use Yii;
@@ -16,7 +10,13 @@ use yii\helpers\FileHelper;
 use yii\web\HttpException;
 
 /**
- * PluploadAction class file.
+ * PluploadAction
+ *
+ * @link http://www.tintsoft.com/
+ * @copyright Copyright (c) 2012 TintSoft Technology Co. Ltd.
+ * @license http://www.tintsoft.com/license/
+ * @author emhome <emhome@163.com>
+ * @since 2.0
  */
 class PluploadAction extends Action {
 
@@ -71,9 +71,9 @@ class PluploadAction extends Action {
     public function run() {
         $uploadedFile = UploadedFile::getInstanceByName($this->inputName);
         $params = Yii::$app->request->getBodyParams();
-        
+
         $params['ext'] = $uploadedFile->extension ?: pathinfo($params['name'], PATHINFO_EXTENSION);
-        
+
         $filename = $this->getUnusedPath($this->tempPath . DIRECTORY_SEPARATOR . $uploadedFile->name);
         $isUploadComplete = ChunkUploader::process($uploadedFile, $filename);
         if ($isUploadComplete) {

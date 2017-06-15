@@ -4,86 +4,238 @@ namespace emhome\plupload;
 
 use Yii;
 
-class PluploadEvents extends InputWidget {
+/**
+ * PluploadEvents
+ *
+ * @author emhome <emhome@163.com>
+ * @since 2.0
+ */
+class PluploadEvents extends \yii\base\Object {
 
-    public function PostInit() {
-        // Called after initialization is finished and internal event handlers bound
-        log('[PostInit]');
+    const JQUERY = 'jQuery';
+
+    public $previewContainer = 'previewContainer';
+    public $errorContainer = 'errorContainer';
+    public $uploadOptions;
+    public $multiSelection;
+    public $autoUpload;
+    public $responeElement;
+    public $attachUrl;
+    //
+    private $appendHtmlType = 'html';
+    private $activeUploadResponse = '';
+
+    public function getScripts($events) {
+        $registerEvents = [];
+        foreach ($events as $method_name) {
+            $method_name = ucfirst($method_name);
+            $method = 'bind' . $method_name;
+            if (!method_exists($this, $method)) {
+                continue;
+            }
+            $registerEvents[$method_name] = $this->$method();
+        }
+
+        return $registerEvents;
     }
 
-    public function Browse($up) {
-        // Called when file picker is clicked
-        log('[Browse]');
+    /**
+     * Init
+     */
+    protected function bindInit() {
+        return 'function(uploader){
+            var params = uploader.getOption("multipart_params");
+            var elementBrowse = ' . self::JQUERY . '("#" + uploader.settings.container);
+            if(params.max_file_nums !== undefined){
+                var uploaded_nums = ' . self::JQUERY . '("#' . $this->previewContainer . '").children().length;
+                if (uploaded_nums >= params.max_file_nums) {
+                    elementBrowse.hide();
+                }
+            }
+        }';
     }
 
-    public function Refresh($up) {
-        // Called when the position or dimensions of the picker change
-        log('[Refresh]');
+    /**
+     * PostInit
+     */
+    protected function bindPostInit() {
+        if (!$this->autoUpload) {
+            $this->activeUploadResponse = self::JQUERY . '("#' . $this->uploadOptions['id'] . '").on("click",function(){
+                uploader.start();
+                return false;
+            });';
+        }
+        return 'function(uploader){
+            ' . self::JQUERY . '(document).on("click", ".plupload_file_action", function () {
+                ' . self::JQUERY . '(this).parent().remove();
+                uploader.refresh();
+            });
+            ' . self::JQUERY . '("#' . $this->errorContainer . '").hide();
+            ' . $this->activeUploadResponse . '
+        }';
     }
 
-    public function StateChanged($up) {
-        // Called when the state of the queue is changed
-        log('[StateChanged]');
+    /**
+     * Browse
+     */
+    protected function bindBrowse($up) {
+        return;
     }
 
-    public function QueueChanged($up) {
-        // Called when queue is changed by adding or removing files
-        log('[QueueChanged]');
+    /**
+     * Refresh
+     */
+    protected function bindRefresh() {
+        return 'function(uploader){
+            var params = uploader.getOption("multipart_params");
+            var elementBrowse = ' . self::JQUERY . '("#" + uploader.settings.container);
+            if(params.max_file_nums !== undefined){
+                var uploaded_nums = ' . self::JQUERY . '("#' . $this->previewContainer . '").children().length;
+                if (uploaded_nums < params.max_file_nums) {
+                    elementBrowse.show();
+                } else {
+                    elementBrowse.hide();
+                }
+            }
+        }';
     }
 
-    public function OptionChanged($up, $name, $value, $oldValue) {
-        // Called when one of the configuration options is changed
-        log('[OptionChanged]');
+    /**
+     * StateChanged
+     */
+    protected function bindStateChanged($up) {
+        return;
     }
 
-    public function BeforeUpload($up, $file) {
-        // Called right before the upload for a given file starts, can be used to cancel it if required
-        log('[BeforeUpload]');
+    /**
+     * QueueChanged
+     */
+    protected function bindQueueChanged($up) {
+        return;
     }
 
-    public function UploadProgress($up, $file) {
-        // Called while file is being uploaded
-        log('[UploadProgress]');
+    /**
+     * OptionChanged
+     */
+    protected function bindOptionChanged($up, $name, $value, $oldValue) {
+        return;
     }
 
-    public function FileFiltered($up, $file) {
-        // Called when file successfully files all the filters
-        log('[FileFiltered]');
+    /**
+     * BeforeUpload
+     */
+    protected function bindBeforeUpload() {
+        return 'function(uploader, file){
+            ' . self::JQUERY . '("#" + file.id).find(".plupload_file_mark").addClass("plupload_file_uploading").html("正在上传");
+        }';
     }
 
-    public function FilesAdded($up, $files) {
-        // Called when files are added to queue
-        log('[FilesAdded]');
+    /**
+     * UploadProgress
+     */
+    protected function bindUploadProgress() {
+        return 'function(uploader, file){
+            var percent = file.percent + "%";
+            var elementFile = ' . self::JQUERY . '("#" + file.id);
+            elementFile.find(".plupload_file_percent").html(percent);
+            elementFile.find(".progress-bar").width(percent);
+        }';
     }
 
-    public function FilesRemoved($up, $files) {
-        // Called when files are removed from queue
-        log('[FilesRemoved]');
+    /**
+     * FileFiltered
+     */
+    protected function bindFileFiltered($up, $file) {
+        return;
     }
 
-    public function FileUploaded($up, $file, $info) {
-        // Called when file has finished uploading
-        log('[FileUploaded] File:');
+    /**
+     * FilesAdded
+     */
+    protected function bindFilesAdded() {
+        $disableBrowse = 'true';
+        if ($this->multiSelection) {
+            $this->appendHtmlType = 'append';
+            $disableBrowse = 'false';
+        }
+        $script = 'uploader.disableBrowse(' . $disableBrowse . ');';
+        if ($this->autoUpload) {
+            $script .= 'uploader.start();';
+        }
+        return 'function(uploader, files){
+            ' . self::JQUERY . '("#' . $this->errorContainer . '").hide();
+            var upfiles = "";
+            plupload.each(files, function(file) {
+                upfiles += Custom.tplUploadItem(file);
+            });
+            ' . self::JQUERY . '(document).on("click", ".plupload_file_action", function () {
+                var id = ' . self::JQUERY . '(this).parent().attr("id");
+                uploader.removeFile(id);
+            });
+            ' . self::JQUERY . '("#' . $this->previewContainer . '").' . $this->appendHtmlType . '(upfiles);
+            uploader.refresh();
+            ' . $script . '
+        }';
     }
 
-    public function ChunkUploaded($up, $file, $info) {
-        // Called when file chunk has finished uploading
-        log('[ChunkUploaded] File:');
+    /**
+     * FilesRemoved
+     */
+    protected function bindFilesRemoved() {
+        return 'function(uploader, files){
+            ' . self::JQUERY . '.each(files, function(index, file) {
+                ' . self::JQUERY . '("#" + file.id).remove();
+            });
+        }';
     }
 
-    public function UploadComplete($up, $files) {
-        // Called when all files are either uploaded or failed
-        log('[UploadComplete]');
+    /**
+     * FileUploaded
+     */
+    protected function bindFileUploaded() {
+        $responeElement = $this->multiSelection ? 'elementFile.find(".plupload_file_input")' : self::JQUERY . '("#' . $this->responeElement . '")';
+        return 'function(uploader, file, res){
+            var response = JSON.parse(res.response);
+            var elementFile = ' . self::JQUERY . '("#" + file.id);
+            var responeElement = ' . $responeElement . ';
+            responeElement.val(response.filename);
+            elementFile.find(".plupload_file_thumb img").attr("src", "' . $this->attachUrl . '" + response.filename);
+            elementFile.removeClass("plupload_file_loading");
+            elementFile.find(".plupload_file_status").remove();
+        }';
     }
 
-    public function Destroy($up) {
-        // Called when uploader is destroyed
-        log('[Destroy] ');
+    /**
+     * ChunkUploaded
+     */
+    protected function bindChunkUploaded($up, $file, $info) {
+        return;
     }
 
-    public function Error($up, $args) {
-        // Called when error occurs
-        log('[Error] ', $args);
+    /**
+     * UploadComplete
+     */
+    protected function bindUploadComplete() {
+        return 'function(uploader,files){
+            uploader.disableBrowse(false);
+        }';
+    }
+
+    /**
+     * Destroy
+     */
+    protected function bindDestroy($up) {
+        return;
+    }
+
+    /**
+     * Error
+     */
+    protected function bindError() {
+        return 'function(uploader, error){
+            var errorElement = ' . self::JQUERY . '(uploader.settings.error_container);
+            errorElement.html("Error #:"+error.code+" "+error.message).show();
+        }';
     }
 
 }

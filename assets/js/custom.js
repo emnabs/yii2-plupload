@@ -52,7 +52,7 @@ var Custom = function () {
             return inputName + '[' + index + ']';
         },
         //main function
-        init: function (options) {
+        init: function (options = []) {
             if (!window.plupload) {
                 return;
             }

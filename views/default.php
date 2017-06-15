@@ -1,7 +1,9 @@
 <?php
 
 use yii\helpers\Html;
-
+?>
+<?= Html::beginTag('div', $htmlOptions) ?>
+<?php
 $data = $model->$attribute;
 
 $html = '';
@@ -12,7 +14,7 @@ if (is_array($data)) {
             'class' => 'plupload_file_input',
         ]);
         $html .= '<div class="plupload_file_thumb">
-                <img src="' . Yii::getAlias('@attachUrl') . $item . '">
+                <img src="' . $attachUrl . $item . '">
             </div>
             <div class="plupload_file_name"><span>' . basename($item) . '</span></div>
             <div class="plupload_file_size">123kb</div>
@@ -29,7 +31,7 @@ if (is_array($data)) {
     if ($data) {
         $html .= '<li class="plupload_file" id="ppi_0">';
         $html .= '<div class="plupload_file_thumb">
-                <img src="' . Yii::getAlias('@attachUrl') . $data . '">
+                <img src="' . $attachUrl . $data . '">
             </div>
             <div class="plupload_file_name"><span>' . basename($data) . '</span></div>
             <div class="plupload_file_size">2.3mb</div>
@@ -41,6 +43,7 @@ if (is_array($data)) {
     }
 }
 ?>
+
 
 <?= Html::tag('ul', $html, $previewOptions) ?>
 
@@ -54,3 +57,5 @@ if (is_array($data)) {
 <?= Html::endTag('div') ?>
 
 <div id="<?= $errorContainer ?>" class="plupload-console"></div>
+
+<?= Html::endTag('div') ?>

@@ -4,20 +4,29 @@ namespace emhome\plupload;
 
 use Yii;
 use yii\base\Exception;
+use yii\base\InvalidParamException;
 use yii\helpers\Url;
 use yii\helpers\Html;
 use yii\helpers\Json;
 use yii\helpers\ArrayHelper;
 use yii\widgets\InputWidget;
-use yii\base\InvalidParamException;
 
+/**
+ * Plupload
+ *
+ * @author emhome <emhome@163.com>
+ * @since 2.0
+ */
 class Plupload extends InputWidget {
 
-    public $responeElementId;
+    const SIZE_UNIT = 'kb';
+
+    public $responeElement;
     public $htmlOptions = ['class' => 'plupload_wrapper'];
     //上传地址
     public $url;
     public $wrapperOptions;
+    public $attachUrl;
     //
     public $browseIcon = 'ionicons ion-android-add';
     public $browseLabel = '<i class="ionicons ion-ios-plus-empty"></i>';
@@ -58,9 +67,8 @@ class Plupload extends InputWidget {
      */
     public function init() {
         parent::init();
-
         // Make sure URL is provided
-        if (empty($this->url)) {
+        if (!$this->url) {
             throw new Exception(Yii::t('yii', '{class} must specify "url" property value.', [
                 '{class}' => get_class($this)
             ]));
@@ -85,15 +93,13 @@ class Plupload extends InputWidget {
             if (is_array($value) || $matches[3] === '[]') {
                 $this->multiSelection = true;
             }
-
             if ($this->multiSelection && !is_array($value)) {
                 $model->$attribute = [$value];
             }
-
-            $this->responeElementId = Html::getInputId($this->model, $this->attribute);
+            $this->responeElement = Html::getInputId($this->model, $this->attribute);
         } else {
-            if (!$this->responeElementId) {
-                $this->responeElementId = $id . "_input";
+            if (!$this->responeElement) {
+                $this->responeElement = $id . "_input";
             }
         }
 
@@ -118,8 +124,6 @@ class Plupload extends InputWidget {
             $this->setWrapperStyle();
             $this->allow_max_nums = 1;
         }
-
-
 
         // 预览
         if (!isset($this->previewOptions['id'])) {
@@ -150,8 +154,6 @@ class Plupload extends InputWidget {
         }
 
         $this->options['multipart_params'][Yii::$app->request->csrfParam] = Yii::$app->request->csrfToken;
-
-
         if ($this->allow_max_nums) {
             $this->options['multipart_params']['max_file_nums'] = $this->allow_max_nums;
         }
@@ -164,7 +166,6 @@ class Plupload extends InputWidget {
      */
     public function run() {
         parent::run();
-        //echo $this->renderInput();
         echo $this->renderPlupload();
     }
 
@@ -173,10 +174,7 @@ class Plupload extends InputWidget {
      */
     protected function renderPlupload() {
         $options = [
-            'multi' => $this->multiSelection,
             'allow_max_nums' => $this->allow_max_nums,
-            'responeElementId' => $this->responeElementId,
-            'data' => $this->getInputValue('array'),
             'containerOptions' => $this->containerOptions,
             'previewOptions' => $this->previewOptions,
             'errorContainer' => $this->errorContainer,
@@ -185,35 +183,14 @@ class Plupload extends InputWidget {
             'autoUpload' => $this->autoUpload,
             'uploadLabel' => $this->uploadLabel,
             'uploadOptions' => $this->uploadOptions,
-            'showUploadProgress' => $this->showUploadProgress
+            'htmlOptions' => $this->htmlOptions,
+            'attachUrl' => $this->attachUrl,
         ];
-
         if ($this->hasModel()) {
             $options['model'] = $this->model;
             $options['attribute'] = $this->attribute;
         }
-
-        $content = $this->render($this->template, $options);
-        return Html::tag('div', $content, $this->htmlOptions);
-    }
-
-    /**
-     * Renders the source input for the DatePicker plugin.
-     *
-     * @return string
-     */
-    protected function renderInput() {
-        if ($this->multiSelection) {
-            return;
-        }
-        return Html::hiddenInput($this->name, $this->value, [
-            'id' => $this->responeElementId,
-        ]);
-        if ($this->hasModel()) {
-            return Html::activeHiddenInput($this->model, $this->attribute);
-        } else {
-            return Html::hiddenInput($this->name, $this->value, $this->options);
-        }
+        return $this->render($this->template, $options);
     }
 
     /**
@@ -228,7 +205,7 @@ class Plupload extends InputWidget {
             'container' => $this->containerOptions['id'],
             'browse_button' => $this->browseOptions['id'],
             'url' => Url::to($this->url),
-            'max_file_size' => self::getPHPMaxUploadSize() . 'mb',
+            'max_file_size' => $this->getUploadMaxSize(),
             'chunk_size' => $this->getChunkSize(),
             'error_container' => "#{$this->errorContainer}",
             'multi_selection' => $this->multiSelection,
@@ -244,7 +221,6 @@ class Plupload extends InputWidget {
         $options = ArrayHelper::merge($defaultOptions, $this->options);
         $options = Json::encode($options);
 
-
         $scripts = implode("\n", [
             "var {$this->id} = new plupload.Uploader({$options});",
             "{$this->id}.init();",
@@ -254,7 +230,7 @@ class Plupload extends InputWidget {
         if ($this->multiSelection) {
             $customOptions = Json::encode([
                 'name' => $this->name,
-                'id' => $this->responeElementId,
+                'id' => $this->responeElement,
             ]);
         }
         $scripts .= "\nCustom.init({$customOptions});";
@@ -285,6 +261,40 @@ class Plupload extends InputWidget {
     }
 
     /**
+     * buildEvents
+     * Generate event JavaScript
+     */
+    protected function buildEvents() {
+        $registerEvents = [
+            'Init',
+            'PostInit',
+            'FilesAdded',
+            'FilesRemoved',
+            'BeforeUpload',
+            'FileUploaded',
+            'UploadComplete',
+            'Refresh',
+            'Error'
+        ];
+        //是否显示上传进度
+        if ($this->showUploadProgress) {
+            $registerEvents[] = 'UploadProgress';
+        }
+        //register script of plupload evnets
+        $configs = [
+            'errorContainer' => $this->errorContainer,
+            'previewContainer' => $this->previewContainer,
+            'uploadOptions' => $this->uploadOptions,
+            'multiSelection' => $this->multiSelection,
+            'autoUpload' => $this->autoUpload,
+            'responeElement' => $this->responeElement,
+            'attachUrl' => $this->attachUrl,
+        ];
+        $event = new PluploadEvents($configs);
+        return $event->getScripts($registerEvents);
+    }
+
+    /**
      * 设置样式
      */
     protected function setWrapperStyle() {
@@ -308,185 +318,24 @@ class Plupload extends InputWidget {
     }
 
     /**
+     * @return int the max upload size in MB
+     */
+    protected function getUploadMaxSize() {
+        $upload_max_filesize = (int) (ini_get('upload_max_filesize'));
+        $post_max_size = (int) (ini_get('post_max_size'));
+        $memory_limit = (int) (ini_get('memory_limit'));
+        return min($upload_max_filesize, $post_max_size, $memory_limit) . 'mb';
+    }
+
+    /**
      * 分块大小
      */
     protected function getChunkSize() {
         $chunksize = (int) $this->chunk_size;
         if ($chunksize) {
-            return $chunksize . 'kb';
+            return $chunksize . self::SIZE_UNIT;
         }
         return $chunksize;
-    }
-
-    /**
-     * @return int the max upload size in MB
-     */
-    protected function buildEvents() {
-        // Generate event JavaScript
-        $defaultEvents = [];
-
-        //Error
-        $defaultEvents['Error'] = 'function(uploader, error){
-			var errorElement = jQuery("#' . $this->errorContainer . '");
-			errorElement.html("Error #:"+error.code+" "+error.message).show();
-		}';
-
-        //UploadProgress
-        if ($this->showUploadProgress) {
-            $defaultEvents['UploadProgress'] = 'function(uploader, file){
-                $("#"+file.id).find(".plupload_file_percent").html(file.percent + "%");
-				$("#"+file.id).find(".progress-bar").width(file.percent + "%");
-			}';
-        }
-
-        $appendHtmlType = 'html';
-        $responeElement = '';
-        if ($this->multiSelection) {
-            $appendHtmlType = 'prepend';
-        }
-
-        $defaultEvents['Init'] = 'function(uploader){
-            var uploaded_nums = jQuery("#' . $this->previewContainer . '").length;
-            var params = uploader.getOption("multipart_params");
-            
-            if(uploaded_nums >= params.max_file_nums){
-                jQuery("#"+uploader.settings.container).hide();
-            }
-		}';
-
-
-        //开启自动上传
-        $activeUploadResponse = '';
-        if ($this->autoUpload) {
-            $defaultEvents['FilesAdded'] = 'function(uploader, files){
-				jQuery("#' . $this->errorContainer . '").hide();
-
-				var upfiles = "";
-				plupload.each(files, function(file) {
-					upfiles += Custom.tplUploadItem(file);
-				});
-
-                $(document).on("click", ".plupload_file_action", function () {
-                    var id = $(this).parent().attr("id");
-                    uploader.removeFile(id);
-                });
-                
-				jQuery("#' . $this->previewContainer . '").' . $appendHtmlType . '(upfiles);
-                uploader.refresh();
-				uploader.disableBrowse(true);
-				uploader.start();
-			}';
-        } else {
-            $activeUploadResponse = 'jQuery("#' . $this->uploadOptions['id'] . '").on("click",function(){
-				uploader.start();
-				return false;
-			});';
-
-            $defaultEvents['FilesAdded'] = 'function(uploader, files){
-				jQuery("#' . $this->errorContainer . '").hide();
-				var upfiles = "";
-				plupload.each(files, function(file) {
-					upfiles += "<div id=\""+file.id+"\">" + file.name + "(" + plupload.formatSize(file.size) + ")<b></b></div>";
-				});
-				jQuery("#' . $this->previewContainer . '").' . $appendHtmlType . '(upfiles);
-			}';
-        }
-
-        $defaultEvents['PostInit'] = 'function(uploader){
-             $(document).on("click", ".plupload_file_action", function () {
-                $(this).parent().remove();
-                uploader.refresh();
-            });
-            jQuery("#' . $this->errorContainer . '").hide();
-			' . $activeUploadResponse . '
-		}';
-
-        $defaultEvents['FilesRemoved'] = 'function(uploader, files){
-            jQuery.each(files, function(index, file) {
-                jQuery("#"+file.id).remove();
-            });
-		}';
-
-        $defaultEvents['Refresh'] = 'function(uploader){
-            var params = uploader.getOption("multipart_params");
-            if(params.max_file_nums !== undefined){
-                var uploaded_nums = $("#' . $this->previewContainer . '").children().length;
-                if (uploaded_nums < params.max_file_nums) {
-                    $("#" + uploader.settings.container).show();
-                } else {
-                    $("#" + uploader.settings.container).hide();
-                }
-            }
-		}';
-
-        $defaultEvents['BeforeUpload'] = 'function(uploader, file){
-            jQuery("#"+file.id).find(".plupload_file_mark").addClass("plupload_file_uploading").html("正在上传");
-		}';
-
-
-        $defaultEvents['FileUploaded'] = 'function(uploader, file, res){
-			var response = JSON.parse(res.response);
-            var responeId = ' . ($this->multiSelection ? 'file.id + " .plupload_file_input"' : '"' . $this->responeElementId . '"') . ';
-            jQuery("#" + responeId).val(response.filename);
-			jQuery("#" + file.id + " .plupload_file_thumb").html("<img src=\"' . Yii::getAlias('@attachUrl') . '" + response.filename + "\">");
-            jQuery("#" + file.id).removeClass("plupload_file_loading");
-            jQuery("#" + file.id + " .plupload_file_status").remove();
-		}';
-
-        $defaultEvents['UploadComplete'] = 'function(uploader,files){
-			uploader.disableBrowse(false);
-		}';
-
-        return $defaultEvents;
-    }
-
-    /**
-     * @return int the max upload size in MB
-     */
-    protected static function getPHPMaxUploadSize() {
-        $upload_max_filesize = (int) (ini_get('upload_max_filesize'));
-        $post_max_size = (int) (ini_get('post_max_size'));
-        $memory_limit = (int) (ini_get('memory_limit'));
-        return min($upload_max_filesize, $post_max_size, $memory_limit);
-    }
-
-    protected function getInputValue($responeType = 'json') {
-        $uploadFiles = $this->value;
-        if ($this->hasModel()) {
-            $uploadFiles = Html::getAttributeValue($this->model, $this->attribute);
-        }
-
-        if (!is_array($uploadFiles)) {
-            $this->showUploadFiles[] = $uploadFiles;
-        } else {
-            $this->showUploadFiles = $uploadFiles;
-        }
-
-        $showUploadFiles = [];
-        foreach ($this->showUploadFiles as $file) {
-            $showUploadFiles[] = [
-                'path' => $file,
-                'name' => basename($file)
-            ];
-        }
-
-        return $responeType == 'json' ? Json::encode($showUploadFiles) : $showUploadFiles;
-
-        return Json::encode($showUploadFiles);
-
-
-        if (!is_array($uploadFiles)) {
-            $uploadFiles[] = $uploadFiles;
-        }
-
-        foreach ($uploadFiles as $file) {
-            $this->showUploadFiles[] = [
-                'path' => $file,
-                'name' => basename($file)
-            ];
-        }
-
-        return Json::encode($this->showUploadFiles);
     }
 
 }
