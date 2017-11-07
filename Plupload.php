@@ -102,7 +102,7 @@ class Plupload extends InputWidget {
             if (is_array($value) || $matches[3] === '[]') {
                 $this->multiSelection = true;
             }
-            if ($this->multiSelection && !is_array($value)) {
+            if ($value && $this->multiSelection && !is_array($value)) {
                 $model->$attribute = [$value];
             }
             $this->responeElement = Html::getInputId($this->model, $this->attribute);
@@ -129,7 +129,6 @@ class Plupload extends InputWidget {
             Html::addCssClass($this->htmlOptions, 'plupload_many_thumb');
         } else {
             Html::addCssClass($this->htmlOptions, 'plupload_one');
-            // Set wrapper of this widget style.
             $this->setWrapperStyle();
             $this->allow_max_nums = 1;
         }
@@ -241,9 +240,8 @@ class Plupload extends InputWidget {
                 'name' => $this->name,
                 'id' => $this->responeElement,
             ]);
+            $scripts .= "\nPluploadCustom.init({$customOptions});";
         }
-        $scripts .= "\nCustom.init({$customOptions});";
-
         $view->registerJs($scripts);
     }
 

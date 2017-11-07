@@ -27,7 +27,7 @@ class PluploadAsset extends AssetBundle {
      */
     public $js = [
         'js/plupload.full.min.js',
-        'js/custom.js',
+        'js/plupload.custom.js',
     ];
 
     /**

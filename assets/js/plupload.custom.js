@@ -1,24 +1,20 @@
-/**
- Custom module for you to write your own javascript functions
- **/
-var Custom = function () {
-    var temp = '';
+
+var PluploadCustom = function () {
     var inputName;
     var inputId;
-    var multiInput = false;
     var plupload;
     return {
-        tplUploadItem: function (file) {
+        tplUploadItem: function (file, multi = false) {
             var path = file.path;
             if (path === undefined) {
                 path = '';
             }
-            return this.buildItem(file.id, file.name, path, plupload.formatSize(file.size));
+            return this.buildItem(file.id, file.name, path, plupload.formatSize(file.size), multi);
         },
-        buildItem: function (id, name, path, size) {
-            temp = '<li class="plupload_file plupload_file_loading" id="' + id + '">';
+        buildItem: function (id, name, path, size, multi) {
+            var temp = '<li class="plupload_file plupload_file_loading" id="' + id + '">';
 
-            temp += this.buildInput(id, path);
+            temp += this.buildInput(id, path, multi);
 
             temp += '<div class="plupload_file_thumb"><img src="' + path + '"></div>';
 
@@ -39,8 +35,8 @@ var Custom = function () {
                     '</div>';
             return temp += '</li>';
         },
-        buildInput: function (index, value) {
-            if (multiInput) {
+        buildInput: function (index, value, multi) {
+            if (multi) {
                 return '<input id="' + this.getInputId(index) + '" name="' + this.getInputName(index) + '" value="' + value + '" type="hidden" class="plupload_file_input">';
             }
             return '';
@@ -57,10 +53,9 @@ var Custom = function () {
                 return;
             }
             plupload = window.plupload;
-            if (options.length !== 0) {
+            if (options.length > 0) {
                 inputName = options.name;
                 inputId = options.id;
-                multiInput = true;
             }
         }
     };
