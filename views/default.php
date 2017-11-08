@@ -13,11 +13,9 @@ if (is_array($data)) {
         $html .= Html::activeHiddenInput($model, $attribute . '[' . $key . ']', [
             'class' => 'plupload_file_input',
         ]);
-        $html .= '<div class="plupload_file_thumb">
-                <img src="' . $attachUrl . $item . '">
-            </div>
+        $html .= '<div class="plupload_file_thumb"><img src="' . $attachUrl . $item . '"></div>
             <div class="plupload_file_name"><span>' . basename($item) . '</span></div>
-            <div class="plupload_file_size">123kb</div>
+            <div class="plupload_file_size"></div>
             <div class="plupload_file_action">
                 <span class="plupload_action_icon">移除</span>
             </div>
@@ -28,16 +26,14 @@ if (is_array($data)) {
     }
 } else {
     if ($multiSelection) {
-        $attribute .= '[]';
+        $attribute .= '[0]';
     }
     echo Html::activeHiddenInput($model, $attribute);
     if ($data) {
         $html .= '<li class="plupload_file" id="ppi_0">';
-        $html .= '<div class="plupload_file_thumb">
-                <img src="' . $attachUrl . $data . '">
-            </div>
+        $html .= '<div class="plupload_file_thumb"><img src="' . $attachUrl . $data . '"></div>
             <div class="plupload_file_name"><span>' . basename($data) . '</span></div>
-            <div class="plupload_file_size">2.3mb</div>
+            <div class="plupload_file_size"></div>
             <div class="plupload_file_action">
                 <span class="plupload_action_icon">移除</span>
             </div>
