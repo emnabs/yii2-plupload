@@ -1,20 +1,22 @@
 
 var PluploadCustom = function () {
-    var inputName;
-    var inputId;
-    var plupload;
     return {
-        tplUploadItem: function (file, multi) {
+        tplUploadItem: function (uploader, file) {
+            var settings = uploader.settings;
             var path = file.path;
-            if (path === undefined) {
-                path = '';
+			var filesize = file.size;
+			if (window.plupload) {
+				filesize = window.plupload.formatSize(filesize);
             }
-            return this.buildItem(file.id, file.name, path, plupload.formatSize(file.size), multi);
-        },
-        buildItem: function (id, name, path, size, multi) {
-            var temp = '<li class="plupload_file plupload_file_loading" id="' + id + '">';
+            var temp = '<li class="plupload_file plupload_file_loading" id="' + file.id + '">';
 
-            temp += this.buildInput(id, path, multi);
+            if (settings.multi_selection === true) {
+				temp += '<input id="' + settings.id + '-' + file.id + '" name="' + settings.input_name + '[' + file.id + ']' + '" value="' + path + '" type="hidden" class="plupload_file_input">';
+            }
+
+			if (path === undefined) {
+                path = settings.error_image_url;
+            }
 
             temp += '<div class="plupload_file_thumb"><img src="' + path + '"></div>';
 
@@ -28,35 +30,14 @@ var PluploadCustom = function () {
                     '</div>' +
                     '</div>';
 
-            temp += '<div class="plupload_file_name"><span>' + name + '</span></div>';
-            temp += '<div class="plupload_file_size">' + size + '</div>';
+            temp += '<div class="plupload_file_name"><span>' + file.name + '</span></div>';
+
+			
+            temp += '<div class="plupload_file_size">' + filesize + '</div>';
             temp += '<div class="plupload_file_action">' +
                     '<span class="plupload_action_icon">移除</span>' +
                     '</div>';
             return temp += '</li>';
-        },
-        buildInput: function (index, value, multi) {
-            if (multi) {
-                return '<input id="' + this.getInputId(index) + '" name="' + this.getInputName(index) + '" value="' + value + '" type="hidden" class="plupload_file_input">';
-            }
-            return '';
-        },
-        getInputId: function (index) {
-            return inputId + '-' + index;
-        },
-        getInputName: function (index) {
-            return inputName + '[' + index + ']';
-        },
-        //main function
-        init: function (options) {
-            if (!window.plupload) {
-                return;
-            }
-            plupload = window.plupload;
-            if (options.length > 0) {
-                inputName = options.name;
-                inputId = options.id;
-            }
         }
     };
 }();

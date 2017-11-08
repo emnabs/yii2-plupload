@@ -27,6 +27,9 @@ if (is_array($data)) {
         $containerOptions['style'] = 'display:none;';
     }
 } else {
+    if ($multiSelection) {
+        $attribute .= '[]';
+    }
     echo Html::activeHiddenInput($model, $attribute);
     if ($data) {
         $html .= '<li class="plupload_file" id="ppi_0">';

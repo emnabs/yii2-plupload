@@ -36,6 +36,7 @@ class Plupload extends InputWidget {
     public $uploadOptions = [];
     //
     public $errorContainer;
+    public $errorImageUrl = 'error.png';
     //
     public $previewContainer;
     public $previewOptions = ['class' => 'plupload_preview'];
@@ -106,6 +107,7 @@ class Plupload extends InputWidget {
                 $model->$attribute = [$value];
             }
             $this->responeElement = Html::getInputId($this->model, $this->attribute);
+            $this->options['input_name'] = $this->name;
         } else {
             if (!$this->responeElement) {
                 $this->responeElement = $id . "_input";
@@ -122,6 +124,10 @@ class Plupload extends InputWidget {
 
         if (!empty($this->resize)) {
             $this->options['resize'] = ArrayHelper::merge($this->resizeOptions, $this->resize);
+        }
+
+        if ($this->errorImageUrl !== false) {
+            $this->options['error_image_url'] = $this->errorImageUrl;
         }
 
         if ($this->multiSelection) {
@@ -193,6 +199,7 @@ class Plupload extends InputWidget {
             'uploadOptions' => $this->uploadOptions,
             'htmlOptions' => $this->htmlOptions,
             'attachUrl' => $this->attachUrl,
+            'multiSelection' => $this->multiSelection,
         ];
         if ($this->hasModel()) {
             $options['model'] = $this->model;
@@ -234,14 +241,6 @@ class Plupload extends InputWidget {
             "{$this->id}.init();",
             "{$this->buildCallbackEvent()}",
         ]);
-        $customOptions = '';
-        if ($this->multiSelection) {
-            $customOptions = Json::encode([
-                'name' => $this->name,
-                'id' => $this->responeElement,
-            ]);
-            $scripts .= "\nPluploadCustom.init({$customOptions});";
-        }
         $view->registerJs($scripts);
     }
 

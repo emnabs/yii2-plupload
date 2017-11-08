@@ -166,7 +166,7 @@ class PluploadEvents extends \yii\base\Object {
             ' . self::JQUERY . '("#' . $this->errorContainer . '").hide();
             var upfiles = "";
             plupload.each(files, function(file) {
-                upfiles += PluploadCustom.tplUploadItem(file,' . ($this->multiSelection ? 'true' : 'false') . ');
+                upfiles += PluploadCustom.tplUploadItem(uploader, file);
             });
             ' . self::JQUERY . '(document).on("click", ".plupload_file_action", function () {
                 var id = ' . self::JQUERY . '(this).parent().attr("id");
