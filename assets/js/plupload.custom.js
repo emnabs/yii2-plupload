@@ -4,7 +4,7 @@ var PluploadCustom = function () {
     var inputId;
     var plupload;
     return {
-        tplUploadItem: function (file, multi = false) {
+        tplUploadItem: function (file, multi) {
             var path = file.path;
             if (path === undefined) {
                 path = '';
@@ -48,7 +48,7 @@ var PluploadCustom = function () {
             return inputName + '[' + index + ']';
         },
         //main function
-        init: function (options = []) {
+        init: function (options) {
             if (!window.plupload) {
                 return;
             }
