@@ -42,7 +42,6 @@ class PluploadAsset extends AssetBundle {
      */
     public $depends = [
         'yii\web\JqueryAsset',
-        'yii\bootstrap\BootstrapAsset',
     ];
 
     /**

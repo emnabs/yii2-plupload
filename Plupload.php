@@ -42,16 +42,7 @@ class Plupload extends InputWidget {
     public $previewOptions = ['class' => 'plupload_preview'];
     public $containerOptions = ['class' => 'plupload_container'];
     //
-    public $options = [
-        'filters' => [
-            'mime_types' => [
-                [
-                    'title' => "Image files",
-                    'extensions' => "jpg,gif,png"
-                ],
-            ]
-        ],
-    ];
+    public $options = [];
     public $autoUpload = true;
     public $showUploadProgress = true;
     public $chunk_size = 0;
@@ -230,11 +221,18 @@ class Plupload extends InputWidget {
                 'list' => true,
                 'thumbs' => true,
                 'active' => 'thumbs'
-            ]
+            ],
+            'filters' => [
+                'mime_types' => [
+                    [
+                        'title' => "Image files",
+                        'extensions' => "jpg,gif,png"
+                    ],
+                ]
+            ],
         ];
 
-        $options = ArrayHelper::merge($defaultOptions, $this->options);
-        $options = Json::encode($options);
+        $options = Json::encode(ArrayHelper::merge($defaultOptions, $this->options));
 
         $scripts = implode("\n", [
             "var {$this->id} = new plupload.Uploader({$options});",
