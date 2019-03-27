@@ -2,7 +2,7 @@
 .idea
 
 # netbeans project files
-nbproject
+/nbproject
 
 # zend studio for eclipse project files
 .buildpath
@@ -11,5 +11,11 @@ nbproject
 
 # windows thumbnail cache
 Thumbs.db
-/bower_components/
-/vendor/
+/bower_components
+
+# composer vendor dir
+/vendor
+
+# composer itself is not needed
+composer.phar
+composer.lock
