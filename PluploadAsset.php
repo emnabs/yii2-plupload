@@ -17,9 +17,16 @@ use yii\web\AssetBundle;
  */
 class PluploadAsset extends AssetBundle {
 
+    /**
+     * @var array 包含的JS
+     */
     public $publishOptions = [
-        'forceCopy' => YII_DEBUG
+        'forceCopy' => YII_DEBUG,
     ];
+
+    /**
+     * @var array 包含的JS
+     */
     public $sourcePath = '@emhome/plupload/assets';
 
     /**
