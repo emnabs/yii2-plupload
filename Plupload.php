@@ -15,7 +15,7 @@ use yii\widgets\InputWidget;
  * Plupload
  *
  * @author emhome <emhome@163.com>
- * @since 2.0
+ * @since 2.0.1
  */
 class Plupload extends InputWidget {
 
@@ -23,7 +23,10 @@ class Plupload extends InputWidget {
 
     public $responeElement;
     public $htmlOptions = ['class' => 'plupload_wrapper'];
-    //上传地址
+
+    /**
+     * @var string 上传地址
+     */
     public $url;
     public $wrapperOptions;
     public $attachUrl;
@@ -71,16 +74,14 @@ class Plupload extends InputWidget {
         // Make sure URL is provided
         if (!$this->url) {
             throw new Exception(Yii::t('yii', '{class} must specify "url" property value.', [
-                '{class}' => get_class($this)
+                '{class}' => get_class($this),
             ]));
         }
-
         // Set id of this widget
         if (!isset($this->htmlOptions['id'])) {
             $this->htmlOptions['id'] = $this->getId();
         }
         $id = $this->htmlOptions['id'];
-
         // Set respone element of this widget.
         if ($this->hasModel()) {
             if (!preg_match(Html::$attributeRegex, $this->attribute, $matches)) {
@@ -104,7 +105,6 @@ class Plupload extends InputWidget {
                 $this->responeElement = $id . "_input";
             }
         }
-
         // 设置选取按钮
         if (!isset($this->browseOptions['id'])) {
             $this->browseOptions['id'] = $id . "_browse";
@@ -112,15 +112,12 @@ class Plupload extends InputWidget {
         if (!isset($this->browseOptions['class'])) {
             $this->browseOptions['class'] = "plupload-btn-browse";
         }
-
         if (!empty($this->resize)) {
             $this->options['resize'] = ArrayHelper::merge($this->resizeOptions, $this->resize);
         }
-
         if ($this->errorImageUrl !== false) {
             $this->options['error_image_url'] = $this->errorImageUrl;
         }
-
         if ($this->multiSelection) {
             Html::addCssClass($this->browseOptions, 'btn btn-success');
             Html::addCssClass($this->htmlOptions, 'plupload_many_thumb');
@@ -129,18 +126,15 @@ class Plupload extends InputWidget {
             $this->setWrapperStyle();
             $this->allow_max_nums = 1;
         }
-
         // 预览
         if (!isset($this->previewOptions['id'])) {
             $this->previewOptions['id'] = $id . "_preview";
         }
         $this->previewContainer = $id . "_preview";
-
         // 设置选取按钮
         if (!isset($this->containerOptions['id'])) {
             $this->containerOptions['id'] = $id . "_container";
         }
-
         if (!$this->autoUpload) {
             if (!isset($this->uploadOptions['id'])) {
                 $this->uploadOptions['id'] = $id . "_upload";
@@ -149,20 +143,16 @@ class Plupload extends InputWidget {
                 $this->uploadOptions['class'] = "plupload-btn-upload";
             }
         }
-
         if (!isset($this->errorContainer)) {
             $this->errorContainer = $id . "_error";
         }
-
         if (!isset($this->options['multipart_params'])) {
             $this->options['multipart_params'] = [];
         }
-
         $this->options['multipart_params'][Yii::$app->request->csrfParam] = Yii::$app->request->csrfToken;
         if ($this->allow_max_nums) {
             $this->options['multipart_params']['max_file_nums'] = $this->allow_max_nums;
         }
-
         $this->registerAssets();
     }
 
@@ -205,7 +195,6 @@ class Plupload extends InputWidget {
     public function registerAssets() {
         $bundle = $this->registerAssetBundle();
         $view = $this->getView();
-
         $defaultOptions = [
             'runtimes' => 'html5,flash,silverlight,html4',
             'container' => $this->containerOptions['id'],
@@ -220,20 +209,18 @@ class Plupload extends InputWidget {
             'views' => [
                 'list' => true,
                 'thumbs' => true,
-                'active' => 'thumbs'
+                'active' => 'thumbs',
             ],
             'filters' => [
                 'mime_types' => [
                     [
                         'title' => "Image files",
-                        'extensions' => "jpg,gif,png"
+                        'extensions' => "jpg,gif,png",
                     ],
-                ]
+                ],
             ],
         ];
-
         $options = Json::encode(ArrayHelper::merge($defaultOptions, $this->options));
-
         $scripts = implode("\n", [
             "var {$this->id} = new plupload.Uploader({$options});",
             "{$this->id}.init();",
@@ -278,7 +265,7 @@ class Plupload extends InputWidget {
             'FileUploaded',
             'UploadComplete',
             'Refresh',
-            'Error'
+            'Error',
         ];
         //是否显示上传进度
         if ($this->showUploadProgress) {
@@ -311,7 +298,6 @@ class Plupload extends InputWidget {
             $width = !isset($resize['width']) ?: $resize['width'];
             $height = !isset($resize['height']) ?: $resize['height'];
         }
-
         if (isset($this->wrapperOptions['width'])) {
             $width = (int) $this->wrapperOptions['width'];
         }

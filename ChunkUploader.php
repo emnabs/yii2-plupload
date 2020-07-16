@@ -1,11 +1,5 @@
 <?php
 
-/**
- * @link http://www.tintsoft.com/
- * @copyright Copyright (c) 2012 TintSoft Technology Co. Ltd.
- * @license http://www.tintsoft.com/license/
- */
-
 namespace emhome\plupload;
 
 use Yii;
@@ -14,12 +8,14 @@ use yii\web\UploadedFile;
 
 /**
  * 分片上传类
+ *
  * @package xutl\plupload
  */
 class ChunkUploader {
 
     /**
      * Processes a chunked file upload.
+     *
      * @param UploadedFile $uploadedFile
      * @param string $path path to write chunks to
      * @returns boolean true if file upload is complete, or false if there are more chunks
