@@ -8,6 +8,7 @@ use yii\web\Response;
 use yii\web\UploadedFile;
 use yii\helpers\FileHelper;
 use yii\web\HttpException;
+use yii\web\ForbiddenHttpException;
 
 /**
  * PluploadAction
@@ -19,6 +20,9 @@ use yii\web\HttpException;
  * @since 2.0
  */
 class PluploadAction extends Action {
+
+    const FILE_MODE_IMAGE = 'image';
+    const FILE_MODE_VIDEO = 'video';
 
     /**
      * @var string file input name.
@@ -36,7 +40,7 @@ class PluploadAction extends Action {
      * This value will be used by PHP chmod() function. No umask will be applied.
      * If not set, the permission will be determined by the current environment.
      */
-    public $fileMode;
+    public $fileMode = self::FILE_MODE_IMAGE;
 
     /**
      * @var integer the permission to be set for newly created directories.
@@ -72,13 +76,18 @@ class PluploadAction extends Action {
         $uploadedFile = UploadedFile::getInstanceByName($this->inputName);
         $params = Yii::$app->request->getBodyParams();
 
-        $params['ext'] = $uploadedFile->extension ?: pathinfo($params['name'], PATHINFO_EXTENSION);
-
+        $ext = $uploadedFile->extension ?: pathinfo($params['name'], PATHINFO_EXTENSION);
+        if ($this->fileMode == static::FILE_MODE_IMAGE) {
+            $ext = $this->realFileType($uploadedFile->tempName);
+            if (!in_array($ext, ['png', 'jpg', 'jpeg', 'gif', 'bmp'])) {
+                throw new ForbiddenHttpException('上传失败。不合法的文件类型！');
+            }
+            $params['ext'] = $ext;
+        }
         $filename = $this->getUnusedPath($this->tempPath . DIRECTORY_SEPARATOR . $uploadedFile->name);
         $isUploadComplete = ChunkUploader::process($uploadedFile, $filename);
         if ($isUploadComplete) {
             if ($this->onComplete) {
-
                 return call_user_func($this->onComplete, $filename, $params);
             } else {
                 return [
@@ -107,6 +116,52 @@ class PluploadAction extends Action {
             $suffix++;
         }
         return $newPath;
+    }
+
+    /**
+     * 获取真实文件类型
+     * @param Files[TempName] $filename
+     * @return string
+     */
+    protected function realFileType($filename) {
+        $fp = fopen($filename, "rb");
+        $bin = fread($fp, 8); //只读2字节
+        fclose($fp);
+        $typeCode = null;
+        if (strpos($bin, 'ftyp') !== false) {
+            $vfp = fopen($filename, "rb");
+            $vbin = fread($vfp, 11); //只读2字节
+            fclose($vfp);
+            $ext = str_replace($bin, '', $vbin);
+            return $ext;
+        }
+        $strInfo = @unpack("C2chars", $bin);
+        if (is_array($strInfo)) {
+            $c = implode($strInfo);
+            $typeCode = intval($c);
+        }
+        $maps = [
+            7173 => 'gif',
+            6677 => 'bmp',
+            13780 => 'png',
+            255216 => 'jpg',
+            //
+            7790 => 'exe',
+            7784 => 'midi',
+            8297 => 'rar',
+            8075 => 'zip',
+            6073 => 'htaccess',
+            3432 => 'txt',
+            70108 => 'txt',
+            6063 => 'php',
+            6033 => 'html',
+            6037 => 'cs',
+            8273 => 'avi',
+            2669 => 'mkv',
+            5048 => 'log',
+            9184 => 'log',
+        ];
+        return isset($maps[$typeCode]) ? $maps[$typeCode] : $typeCode;
     }
 
 }
