@@ -113,7 +113,7 @@ class Plupload extends InputWidget {
             $this->browseOptions['class'] = "plupload-btn-browse";
         }
         if (!empty($this->resize)) {
-            $this->options['resize'] = ArrayHelper::merge($this->resizeOptions, $this->resize);
+            $this->options['multipart_params']['resize'] = ArrayHelper::merge($this->resizeOptions, $this->resize);
         }
         if ($this->errorImageUrl !== false && !Url::isRelative($this->errorImageUrl)) {
             $this->options['error_image_url'] = $this->errorImageUrl;
