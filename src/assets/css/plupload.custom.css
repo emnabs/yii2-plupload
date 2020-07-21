@@ -137,10 +137,12 @@
 
 .plupload_file .plupload_file_action{
     left: auto;
-    right: -10px;
-    top: -10px;
-    width: 30px;
-    height: 30px;
+    right: -1px;
+    top: -1px;
+    width: 15%;
+    height: 15%;
+    min-width: 20px;
+    min-height: 20px;
     cursor: help;
 }
 .plupload_file .plupload_file_action .plupload_action_icon{
