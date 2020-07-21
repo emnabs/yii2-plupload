@@ -32,7 +32,7 @@ class Plupload extends InputWidget {
     public $attachUrl;
     //
     public $browseIcon = 'ionicons ion-android-add';
-    public $browseLabel = '<i class="ionicons ion-ios-plus-empty"></i>';
+    public $browseLabel = '上传图片';
     public $browseOptions;
     //
     public $uploadLabel = 'Upload Files';

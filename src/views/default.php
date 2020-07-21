@@ -48,7 +48,7 @@ if (is_array($data)) {
 
 <?= Html::beginTag('div', $containerOptions) ?>
 <?php if ($autoUpload): ?>
-    <?= Html::a('<span>' . $browseLabel . '<b>上传图片</b></span>', 'javascript:;', $browseOptions) ?>
+    <?= Html::a('<span class="plupload_browse_icon"></span><b class="plupload_browse_label">' . $browseLabel . '</b>', 'javascript:;', $browseOptions) ?>
 <?php else: ?>
     <?= Html::a($browseLabel, 'javascript:;', $browseOptions) ?>
     <?= Html::a($uploadLabel, 'javascript:;', $uploadOptions) ?>
