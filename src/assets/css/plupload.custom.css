@@ -198,7 +198,7 @@
     align-items: center;
     flex-direction: column;
     justify-content: center;
-    padding: 15%;
+    padding: 0;
 }
 .plupload_one .plupload-btn-browse > *{
     /* Hack flex box not work on some android devices like Xiaomi 2 */
@@ -210,7 +210,6 @@
     width: 50px;
     background: transparent url(../images/add.svg) no-repeat center center;
     background-size: contain;
-
 }
 .plupload_one .plupload-btn-browse .plupload_browse_label{
     /*flex: none;*/
