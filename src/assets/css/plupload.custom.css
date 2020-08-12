@@ -156,12 +156,9 @@
     text-indent: -9999px; 
 }
 
-
-
 .plupload_file_loading > *:not(.plupload_file_status){
     display: none !important;
 }
-
 
 /*.plupload_one*/
 .plupload_wrapper.plupload_one{
@@ -200,7 +197,7 @@
     -moz-box-align: center;
     align-items: center;
     flex-direction: column;
-    justify-content: space-around;
+    justify-content: center;
     padding: 15%;
 }
 .plupload_one .plupload-btn-browse > *{
@@ -209,8 +206,8 @@
     overflow:hidden;
 }
 .plupload_one .plupload-btn-browse .plupload_browse_icon{
-    height: 50%;
-    width: 50%;
+    height: 50px;
+    width: 50px;
     background: transparent url(../images/add.svg) no-repeat center center;
     background-size: contain;
 
@@ -241,9 +238,8 @@
     font-size: 16px;
     display: block;
     font-weight: normal;
+    margin-top: 15px;
 }
-
-
 
 /*.plupload_many_thumb*/
 .plupload_wrapper.plupload_many_thumb{
