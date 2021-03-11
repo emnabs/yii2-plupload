@@ -1,6 +1,9 @@
 /*Plupload*/
+:root {
+    --scalebox-ratio: 61.8%;
+}
 
-.plupload_wrapper{
+.plupload_wrapper {
     position: relative;
 }
 .plupload_preview,
@@ -164,7 +167,14 @@
 .plupload_wrapper.plupload_one{
     border: 1px dashed #ccc;
 }
+.plupload_wrapper.plupload_one:after{
+    padding-top: var(--scalebox-ratio);
+    content: "";
+    width: 100%;
+    display: block;
+}
 .plupload_one .plupload_container{
+    position: absolute;
     width: 100%;
     height: 100%;
 }

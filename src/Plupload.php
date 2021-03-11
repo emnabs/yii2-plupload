@@ -296,17 +296,20 @@ class Plupload extends InputWidget {
         }
         $width = 480;
         $height = 300;
-        if (isset($this->options['resize']) && !empty($resize = $this->options['resize'])) {
-            $width = !isset($resize['width']) ?: $resize['width'];
-            $height = !isset($resize['height']) ?: $resize['height'];
+        if (!empty($this->resize)) {
+            $_w = ArrayHelper::getValue($this->resize, 'width');
+            $_h = ArrayHelper::getValue($this->resize, 'height');
+            if ($_w) {
+                $width = $_w;
+            }
+            if ($_h) {
+                $height = $_h;
+            }
         }
-        if (isset($this->wrapperOptions['width'])) {
-            $width = (int) $this->wrapperOptions['width'];
+        if ($width) {
+            $scale = $height / $width * 100;
+            Html::addCssStyle($this->htmlOptions, "--scalebox-ratio: {$scale}%;");
         }
-        if (isset($this->wrapperOptions['height'])) {
-            $height = (int) $this->wrapperOptions['height'];
-        }
-        $this->htmlOptions['style'] = "width: {$width}px; height: {$height}px;";
     }
 
     /**
