@@ -2,7 +2,6 @@
 
 namespace emhome\plupload;
 
-use Yii;
 use yii\web\AssetBundle;
 
 /**
@@ -16,11 +15,12 @@ use yii\web\AssetBundle;
  * @license http://www.plupload.com/license
  * @see http://www.plupload.com/contributing
  * ```
- * 
+ *
  * @author emhome <emhome@163.com>
  * @since 2.0.1
  */
-class PluploadPluginAsset extends AssetBundle {
+class PluploadPluginAsset extends AssetBundle
+{
 
     /**
      * @inheritdoc
@@ -40,26 +40,5 @@ class PluploadPluginAsset extends AssetBundle {
     public $depends = [
         'yii\web\JqueryAsset',
     ];
-
-    /**
-     * @var string 使用语言包
-     */
-    public $language;
-
-    /**
-     * @inheritdoc
-     */
-    public function init() {
-        if (!$this->language) {
-            $this->language = Yii::$app->language;
-        }
-        $language = str_replace('-', '_', $this->language);
-        $fallbackLanguage = substr($this->language, 0, 2);
-        if ($fallbackLanguage !== $this->language && !file_exists(Yii::getAlias($this->sourcePath . "/js/i18n/{$language}.js"))) {
-            $language = $fallbackLanguage;
-        }
-        $this->js[] = "js/i18n/$language.js";
-        parent::init();
-    }
 
 }
